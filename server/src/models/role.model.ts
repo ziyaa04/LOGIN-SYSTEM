@@ -9,6 +9,7 @@ import {
   Unique,
 } from 'sequelize-typescript';
 import { UserRole } from './user-role.model';
+import { User } from './user.model';
 
 @Table({ tableName: 'roles', timestamps: false })
 export class Role extends Model {
@@ -22,6 +23,6 @@ export class Role extends Model {
   @Column({ type: DataType.STRING })
   name: string;
 
-  @HasMany(() => UserRole, 'roleId')
-  users: UserRole[];
+  @HasMany(() => UserRole)
+  users: User[];
 }

@@ -3,7 +3,7 @@ import {
   BelongsTo,
   Column,
   DataType,
-  HasOne,
+  ForeignKey,
   Model,
   PrimaryKey,
   Table,
@@ -24,10 +24,10 @@ export class Token extends Model {
   hash: string;
 
   @Unique
-  @BelongsTo(() => User, 'id')
+  @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, field: 'user_id' })
   userId: number;
 
-  @HasOne(() => User, 'id')
+  @BelongsTo(() => User)
   user: User;
 }

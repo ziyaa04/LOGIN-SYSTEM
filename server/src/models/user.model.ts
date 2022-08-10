@@ -4,6 +4,7 @@ import {
   Column,
   DataType,
   Default,
+  ForeignKey,
   HasMany,
   HasOne,
   Model,
@@ -47,9 +48,9 @@ export class User extends Model {
   @Column({ type: DataType.STRING })
   hash: string;
 
-  @HasMany(() => UserRole, 'userId')
+  @HasMany(() => UserRole)
   roles: UserRole[];
 
-  @HasOne(() => Token, 'userId')
+  @HasOne(() => Token)
   token: Token;
 }
