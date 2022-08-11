@@ -1,4 +1,5 @@
 import {
+  AllowNull,
   AutoIncrement,
   Column,
   DataType,
@@ -20,6 +21,7 @@ export class Role extends Model {
   id: number;
 
   @Unique
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   name: string;
 

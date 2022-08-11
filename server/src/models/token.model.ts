@@ -1,4 +1,5 @@
 import {
+  AllowNull,
   AutoIncrement,
   BelongsTo,
   Column,
@@ -20,10 +21,12 @@ export class Token extends Model {
   id: number;
 
   @Unique
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   hash: string;
 
   @Unique
+  @AllowNull(false)
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, field: 'user_id' })
   userId: number;

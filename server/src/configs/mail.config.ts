@@ -12,7 +12,7 @@ export default (): MailerOptions => ({
     },
   },
   defaults: {
-    from: process.env.MAIL_USER,
+    from: `${process.env.APP_NAME} <${process.env.MAIL_USER}>`,
     replyTo: process.env.MAIL_REPLY_USER,
   },
   template: {

@@ -8,6 +8,14 @@ import mailConfig from '../configs/mail.config';
 import { RoleRepository } from '../repositories/role.repository';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Role } from '../models/role.model';
+import { UserRepository } from '../repositories/user.repository';
+import { UserRoleRepository } from '../repositories/user-role.repository';
+import { TokenRepository } from '../repositories/token.repository';
+import { User } from '../models/user.model';
+import { Token } from '../models/token.model';
+import { UserRole } from '../models/user-role.model';
+import { Sequelize } from 'sequelize-typescript';
+import { MailService } from '../helpers/mail.service';
 
 @Module({
   imports: [
@@ -17,10 +25,31 @@ import { Role } from '../models/role.model';
     MailerModule.forRootAsync({
       useFactory: mailConfig,
     }),
-    SequelizeModule.forFeature([Role]),
+    SequelizeModule.forFeature([Role, User, Token, UserRole]),
   ],
   controllers: [AuthController],
-  providers: [RoleRepository, AuthService],
-  exports: [],
+  providers: [
+    {
+      provide: 'SEQUELIZE',
+      useExisting: Sequelize,
+    },
+    MailService,
+    RoleRepository,
+    UserRepository,
+    UserRoleRepository,
+    TokenRepository,
+    AuthService,
+  ],
+  exports: [
+    MailService,
+    RoleRepository,
+    UserRepository,
+    UserRoleRepository,
+    TokenRepository,
+    {
+      provide: 'SEQUELIZE',
+      useExisting: Sequelize,
+    },
+  ],
 })
 export class AuthModule {}

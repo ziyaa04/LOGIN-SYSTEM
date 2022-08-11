@@ -1,4 +1,5 @@
 import {
+  AllowNull,
   AutoIncrement,
   BelongsTo,
   Column,
@@ -21,11 +22,13 @@ export class UserRole extends Model {
   id: number;
 
   @Unique
+  @AllowNull(false)
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, field: 'user_id' })
   userId: number;
 
   @Unique
+  @AllowNull(false)
   @ForeignKey(() => Role)
   @Column({ type: DataType.INTEGER, field: 'role_id' })
   roleId: number;
