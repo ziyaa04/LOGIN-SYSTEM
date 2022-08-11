@@ -9,7 +9,6 @@ import {
   Table,
   Unique,
 } from 'sequelize-typescript';
-import { Token } from './token.model';
 import { User } from './user.model';
 import { Role } from './role.model';
 
