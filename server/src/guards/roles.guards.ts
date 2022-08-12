@@ -1,7 +1,6 @@
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
-import { User } from '../models/user.model';
 
 export class RolesGuards implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
