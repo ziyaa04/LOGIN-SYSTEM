@@ -14,10 +14,6 @@ export class AuthService {
   ) {}
 
   async login() {
-    this.mailService.sendVerifyAccountMail(
-      'ziyakerimli04@gmail.com',
-      'http://localhost:8000',
-    );
     return {};
   }
 
