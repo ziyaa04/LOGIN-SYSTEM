@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
 
   async login() {
-    return {};
+    return await this.userRepository.getAll({ include: { all: true } });
   }
 
   signUp() {

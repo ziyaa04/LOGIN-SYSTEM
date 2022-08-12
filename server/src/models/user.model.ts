@@ -1,10 +1,10 @@
 import {
   AllowNull,
   AutoIncrement,
+  BelongsToMany,
   Column,
   DataType,
   Default,
-  HasMany,
   HasOne,
   Model,
   PrimaryKey,
@@ -14,6 +14,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { UserRole } from './user-role.model';
 import { Token } from './token.model';
+import { Role } from './role.model';
 
 @Table({
   tableName: 'users',
@@ -47,8 +48,8 @@ export class User extends Model {
   @Column({ type: DataType.STRING })
   hash: string;
 
-  @HasMany(() => UserRole)
-  roles: UserRole[];
+  @BelongsToMany(() => Role, () => UserRole)
+  roles: Role[];
 
   @HasOne(() => Token)
   token: Token;

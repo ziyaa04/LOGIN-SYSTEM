@@ -1,8 +1,11 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Roles } from '../decorators/roles.decorator';
 import RolesEnum from '../enums/roles.enum';
+import { RolesGuards } from '../guards/roles.guards';
+import { Reflector } from '@nestjs/core';
 
+@UseGuards(new RolesGuards(new Reflector()))
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -28,7 +31,7 @@ export class AuthController {
     return this.authService.refreshToken();
   }
 
-  @Roles()
+  @Roles(RolesEnum.USER)
   @Post('send-verify-mail')
   sendVerifyMail() {
     return this.authService.sendVerifyMail();

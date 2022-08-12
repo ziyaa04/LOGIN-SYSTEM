@@ -1,9 +1,9 @@
 import {
   AllowNull,
   AutoIncrement,
+  BelongsToMany,
   Column,
   DataType,
-  HasMany,
   Model,
   PrimaryKey,
   Table,
@@ -25,6 +25,6 @@ export class Role extends Model {
   @Column({ type: DataType.STRING })
   name: string;
 
-  @HasMany(() => UserRole)
+  @BelongsToMany(() => User, () => UserRole)
   users: User[];
 }

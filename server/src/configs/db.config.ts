@@ -13,5 +13,5 @@ export default (): SequelizeModuleOptions => ({
   database: process.env.DB_NAME,
   models: [User, Role, UserRole, Token],
   autoLoadModels: true,
-  logging: Boolean(process.env.DB_LOG),
+  logging: process.env.DB_LOG.toLowerCase() === 'true' ? true : false,
 });

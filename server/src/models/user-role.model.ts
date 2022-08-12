@@ -21,13 +21,11 @@ export class UserRole extends Model {
   @Column({ type: DataType.INTEGER })
   id: number;
 
-  @Unique
   @AllowNull(false)
   @ForeignKey(() => User)
   @Column({ type: DataType.INTEGER, field: 'user_id' })
   userId: number;
 
-  @Unique
   @AllowNull(false)
   @ForeignKey(() => Role)
   @Column({ type: DataType.INTEGER, field: 'role_id' })
