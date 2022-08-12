@@ -12,6 +12,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthModule } from './auth/auth.module';
 import dbConfig from './configs/db.config';
 import { CsrfMiddleware } from './middlewares/csrf.middleware';
+import { JwtMiddleware } from './middlewares/jwt.middleware';
 
 @Module({
   imports: [
@@ -30,5 +31,6 @@ export class AppModule implements NestModule {
       path: '*',
       method: RequestMethod.POST,
     });
+    consumer.apply(JwtMiddleware).forRoutes('*');
   }
 }

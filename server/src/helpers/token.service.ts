@@ -28,11 +28,13 @@ export class TokenService {
       if (options) return this.jwtService.verify(token, options);
       return this.jwtService.verify(token);
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
-  verifyAccessToken(token) {
+  verifyAccessToken(authorization = '') {
+    const token = authorization.split(' ')[1];
+    if (!token) return null;
     return this.verifyToken(token, this.accessVerifyConfig);
   }
 

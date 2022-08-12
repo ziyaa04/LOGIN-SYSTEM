@@ -16,6 +16,7 @@ import { Token } from '../models/token.model';
 import { UserRole } from '../models/user-role.model';
 import { Sequelize } from 'sequelize-typescript';
 import { MailService } from '../helpers/mail.service';
+import { TokenService } from '../helpers/token.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MailService } from '../helpers/mail.service';
       provide: 'SEQUELIZE',
       useExisting: Sequelize,
     },
+    TokenService,
     MailService,
     RoleRepository,
     UserRepository,
@@ -41,6 +43,7 @@ import { MailService } from '../helpers/mail.service';
     AuthService,
   ],
   exports: [
+    TokenService,
     MailService,
     RoleRepository,
     UserRepository,
