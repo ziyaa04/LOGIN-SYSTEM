@@ -13,6 +13,8 @@ import { AuthModule } from './auth/auth.module';
 import dbConfig from './configs/db.config';
 import { CsrfMiddleware } from './middlewares/csrf.middleware';
 import { JwtMiddleware } from './middlewares/jwt.middleware';
+import { APP_PIPE } from '@nestjs/core';
+import { ValidationPipe } from './pipes/validation.pipe';
 
 @Module({
   imports: [
@@ -23,7 +25,13 @@ import { JwtMiddleware } from './middlewares/jwt.middleware';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {

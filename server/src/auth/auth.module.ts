@@ -17,6 +17,8 @@ import { UserRole } from '../models/user-role.model';
 import { Sequelize } from 'sequelize-typescript';
 import { MailService } from '../helpers/mail.service';
 import { TokenService } from '../helpers/token.service';
+import { ExistsValidator } from '../validators/exists.validator';
+import { NotExistsValidator } from '../validators/not-exists.validator';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { TokenService } from '../helpers/token.service';
       provide: 'SEQUELIZE',
       useExisting: Sequelize,
     },
+    NotExistsValidator,
+    ExistsValidator,
     TokenService,
     MailService,
     RoleRepository,

@@ -23,6 +23,13 @@ export class TokenService {
     return this.sign(payload);
   }
 
+  signTokens(payload) {
+    return {
+      accessToken: this.signAccessToken(payload),
+      refreshToken: this.signRefreshToken(payload),
+    };
+  }
+
   verifyToken(token, options?: JwtVerifyOptions) {
     try {
       if (options) return this.jwtService.verify(token, options);

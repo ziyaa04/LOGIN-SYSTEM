@@ -7,10 +7,12 @@ export class RolesGuards implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
     const necessaryRoles =
-      this.reflector.get<string[]>('roles', context.getHandler) ?? [];
-    const user: User | null = context.switchToHttp().getRequest<Request>()[
-      'user'
-    ];
+      this.reflector.get<string[]>('roles', context.getHandler()) ?? [];
+    const user = context.switchToHttp().getRequest<Request>()['user'];
+    console.dir({
+      necessaryRoles,
+      user,
+    });
     // if not exists role
     if (!necessaryRoles.length) {
       if (!user) return true;
@@ -21,8 +23,9 @@ export class RolesGuards implements CanActivate {
     if (!user) return false;
     else {
       // if user logged in
-      for (const role of user.roles)
-        if (necessaryRoles.includes(role.name)) return true;
+      for (const role of user.roles) {
+        if (necessaryRoles.includes(role)) return true;
+      }
       return false;
     }
   }

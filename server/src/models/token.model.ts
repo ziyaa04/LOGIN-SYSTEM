@@ -22,7 +22,7 @@ export class Token extends Model {
 
   @Unique
   @AllowNull(false)
-  @Column({ type: DataType.STRING })
+  @Column({ type: DataType.TEXT })
   hash: string;
 
   @Unique
