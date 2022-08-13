@@ -5,7 +5,7 @@ export interface IUserAttrs {
   id?: number;
   email?: string;
   password?: string;
-  isActive?: boolean;
+  isActivated?: boolean;
   hash?: string;
   createdAt?: Date;
   updatedAt?: Date;

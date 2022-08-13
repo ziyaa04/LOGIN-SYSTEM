@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import jwtAccessVerifyConfig from '../configs/jwt/access/jwt-access-verify.config';
 import jwtAccessSignConfig from '../configs/jwt/access/jwt-access-sign.config';
+import { User } from '../models/user.model';
+import { Response } from 'express';
 
 @Injectable()
 export class TokenService {
@@ -47,5 +49,20 @@ export class TokenService {
 
   verifyRefreshToken(token) {
     return this.verifyToken(token);
+  }
+
+  generatePayload(user: User, ...roles) {
+    return {
+      email: user.email,
+      isActivated: user.isActivated,
+      roles: user?.roles?.length
+        ? user.roles.map((role) =>
+            typeof role === 'string' ? role : role.name,
+          )
+        : roles,
+    };
+  }
+  addRefreshTokenToCookie(res: Response, refreshToken: string) {
+    res.cookie('refreshToken', refreshToken, { httpOnly: true });
   }
 }

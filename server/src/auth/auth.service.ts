@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 import { UserRepository } from '../repositories/user.repository';
 import { TokenRepository } from '../repositories/token.repository';
@@ -15,6 +21,7 @@ import RolesEnum from '../enums/roles.enum';
 import { Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import ValidationErrorMessages from '../enums/error-messages/validation.error-messages.enum';
+import { Role } from '../models/role.model';
 
 @Injectable()
 export class AuthService {
@@ -49,11 +56,7 @@ export class AuthService {
         throw new BadRequestException({
           password: [ValidationErrorMessages.wrongPassword],
         });
-      const payload = {
-        email: user.email,
-        roles: user.roles.map((role) => (console.log(role.name), role.name)),
-        isActivated: user.isActivated,
-      };
+      const payload = this.tokenService.generatePayload(user);
       const { accessToken, refreshToken } =
         this.tokenService.signTokens(payload);
       // add refreshToken to the db
@@ -61,20 +64,20 @@ export class AuthService {
         hash: refreshToken,
         userId: user.id,
       });
-
+      // add token to cookie
+      this.tokenService.addRefreshTokenToCookie(res, refreshToken);
       return {
         accessToken,
         refreshToken,
         user: payload,
       };
     } catch (e) {
-      console.log(e);
       if (e instanceof BadRequestException) throw e;
       throw new DbException(DbErrorMessage.wentWrong);
     }
   }
 
-  async signUp(signUpDto: SignUpDto) {
+  async signUp(res: Response, signUpDto: SignUpDto) {
     const t = await this.sequlize.transaction();
     try {
       // write user to the db
@@ -93,14 +96,10 @@ export class AuthService {
         { transaction: t },
       );
 
-      const signObject = {
-        email: user.email,
-        isActivated: user.isActivated,
-        roles: [RolesEnum.USER],
-      };
+      const payload = this.tokenService.generatePayload(user, RolesEnum.USER);
       // get tokens
       const { accessToken, refreshToken } =
-        this.tokenService.signTokens(signObject);
+        this.tokenService.signTokens(payload);
       await this.tokenRepository.create(
         {
           userId: user.id,
@@ -110,21 +109,21 @@ export class AuthService {
       );
 
       await t.commit();
+      // add token to the cookie
+      this.tokenService.addRefreshTokenToCookie(res, refreshToken);
       // return tokens
       return {
         accessToken,
         refreshToken,
-        signObject,
+        payload,
       };
     } catch (e) {
-      console.log(e);
       // catch db error and throw it
       await t.rollback();
       throw new DbException(DbErrorMessage.wentWrong);
     }
   }
 
-  @Roles(RolesEnum.ADMIN, RolesEnum.USER)
   async logout(res: Response, hash: string) {
     try {
       const deleted = await this.tokenRepository.deleteOneByHash(hash);
@@ -136,7 +135,27 @@ export class AuthService {
     }
   }
 
-  refreshToken() {
+  async refreshToken(res: Response, token: string) {
+    if (!token) throw new ForbiddenException();
+    try {
+      const user = this.tokenService.verifyRefreshToken(token);
+      if (!user) {
+        await this.tokenRepository.deleteOneByHash(token);
+        throw new ForbiddenException();
+      }
+      const exists = await this.tokenRepository.getOneByHash(token);
+      if (!exists) throw new ForbiddenException();
+      const tokens = this.tokenService.signTokens(
+        this.tokenService.generatePayload(user, ...user.roles),
+      );
+      return {
+        ...tokens,
+        user,
+      };
+    } catch (e) {
+      if (e instanceof ForbiddenException) throw e;
+      throw new InternalServerErrorException(DbErrorMessage.wentWrong);
+    }
     return {};
   }
 
@@ -144,7 +163,37 @@ export class AuthService {
     return {};
   }
 
-  verify() {
+  async verify(res: Response, token: string, hash: string) {
+    const t = await this.sequlize.transaction();
+    try {
+      const update = await this.userRepository.updateOneByHash(
+        hash,
+        {
+          isActivated: true,
+        },
+        { transaction: t, where: {} },
+      );
+      if (!update) throw new Error();
+      const user = this.tokenService.verifyRefreshToken(token);
+      const newToken = this.tokenService.signRefreshToken({
+        email: user.email,
+        isActivated: true,
+        roles: user.roles,
+      });
+      const updateToken = await this.tokenRepository.updateOneByHash(
+        token,
+        { hash: newToken },
+        { transaction: t, where: {} },
+      );
+      console.log(updateToken);
+      if (!updateToken) throw new Error();
+      this.tokenService.addRefreshTokenToCookie(res, newToken);
+      await t.commit();
+      return {};
+    } catch (e) {
+      await t.rollback();
+      throw new DbException(DbErrorMessage.wentWrong);
+    }
     return {};
   }
 }

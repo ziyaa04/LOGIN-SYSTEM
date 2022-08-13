@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -28,29 +29,40 @@ export class AuthController {
   }
 
   @Post('sign-up')
-  signUp(@Body() signUpDto: SignUpDto) {
-    return this.authService.signUp(signUpDto);
+  signUp(
+    @Res({ passthrough: true }) res: Response,
+    @Body() signUpDto: SignUpDto,
+  ) {
+    return this.authService.signUp(res, signUpDto);
   }
 
+  @Roles(RolesEnum.USER, RolesEnum.ADMIN)
   @Post('logout')
   @SetMetadata('roles', [RolesEnum.USER, RolesEnum.ADMIN])
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res, req.cookies.refreshToken);
   }
 
+  @Roles(RolesEnum.ALL)
   @Get('refresh-token')
-  refreshToken() {
-    return this.authService.refreshToken();
+  refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    return this.authService.refreshToken(res, req?.cookies?.refreshToken);
   }
 
+  @Roles(RolesEnum.USER)
   @Roles(RolesEnum.USER)
   @Post('send-verify-mail')
   sendVerifyMail() {
     return this.authService.sendVerifyMail();
   }
 
+  @Roles(RolesEnum.ALL)
   @Get('verify/:hash')
-  verify() {
-    return this.authService.verify();
+  verify(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+    @Param('hash') hash: string,
+  ) {
+    return this.authService.verify(res, req.cookies.refreshToken, hash);
   }
 }

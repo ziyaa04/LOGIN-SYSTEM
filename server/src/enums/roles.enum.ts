@@ -1,4 +1,5 @@
 enum RolesEnum {
+  ALL = 'all',
   ADMIN = 'admin',
   USER = 'user',
 }
