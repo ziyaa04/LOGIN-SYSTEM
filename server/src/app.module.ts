@@ -15,6 +15,10 @@ import { CsrfMiddleware } from './middlewares/csrf.middleware';
 import { JwtMiddleware } from './middlewares/jwt.middleware';
 import { APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from './pipes/validation.pipe';
+import { UserModule } from './user/user.module';
+import { RepositoriesModule } from './repositories/repositories.module';
+import { HelpersModule } from './helpers/helpers.module';
+import { ValidatorsModule } from './validators/validators.module';
 
 @Module({
   imports: [
@@ -23,6 +27,10 @@ import { ValidationPipe } from './pipes/validation.pipe';
       useFactory: dbConfig,
     }),
     AuthModule,
+    UserModule,
+    RepositoriesModule,
+    HelpersModule,
+    ValidatorsModule,
   ],
   controllers: [AppController],
   providers: [

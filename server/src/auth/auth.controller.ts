@@ -17,8 +17,10 @@ import { Reflector } from '@nestjs/core';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
+import { ActivationRoles } from '../decorators/activation-roles.decorator';
+import ActivationRolesEnum from '../enums/activation-roles.enum';
 
-@UseGuards(new RolesGuards(new Reflector()))
+@UseGuards(RolesGuards)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -38,7 +40,6 @@ export class AuthController {
 
   @Roles(RolesEnum.USER, RolesEnum.ADMIN)
   @Post('logout')
-  @SetMetadata('roles', [RolesEnum.USER, RolesEnum.ADMIN])
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.authService.logout(res, req.cookies.refreshToken);
   }
@@ -49,7 +50,7 @@ export class AuthController {
     return this.authService.refreshToken(res, req?.cookies?.refreshToken);
   }
 
-  @Roles(RolesEnum.USER)
+  @ActivationRoles(ActivationRolesEnum.NOTACTIVE)
   @Roles(RolesEnum.USER)
   @Post('send-verify-mail')
   sendVerifyMail() {

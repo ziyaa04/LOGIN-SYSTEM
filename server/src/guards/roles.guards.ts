@@ -1,10 +1,10 @@
-import { CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject } from '@nestjs/common';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 import RolesEnum from '../enums/roles.enum';
 
 export class RolesGuards implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector.name) private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
     const necessaryRoles =
       this.reflector.get<string[]>('roles', context.getHandler()) ?? [];
