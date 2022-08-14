@@ -1,9 +1,11 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 import { UserRepository } from '../repositories/user.repository';
@@ -16,12 +18,11 @@ import { TokenService } from '../helpers/token.service';
 import * as bcrypt from 'bcrypt';
 import { DbException } from '../exceptions/db.exception';
 import DbErrorMessage from '../enums/error-messages/db.error-message.enum';
-import { Roles } from '../decorators/roles.decorator';
 import RolesEnum from '../enums/roles.enum';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import ValidationErrorMessages from '../enums/error-messages/validation.error-messages.enum';
-import { Role } from '../models/role.model';
+import MailErrorMessagesEnum from '../enums/error-messages/mail.error-messages.enum';
 
 @Injectable()
 export class AuthService {
@@ -159,41 +160,67 @@ export class AuthService {
     return {};
   }
 
-  sendVerifyMail() {
+  async sendVerifyMail(req: Request & { user }, res: Response) {
+    try {
+      const canSend = this.mailService.checkLastMailTime(req);
+      if (!canSend) throw new BadRequestException(MailErrorMessagesEnum.wait);
+      const user = await this.userRepository.getOneByEmail(req.user.email);
+      const send = await this.mailService.sendVerifyAccountMail(
+        user.email,
+        user.hash,
+      );
+      if (!send) throw new Error();
+      res.cookie('lastMailTime', Date.now());
+    } catch (e) {
+      if (e instanceof BadRequestException) throw e;
+      throw new InternalServerErrorException(MailErrorMessagesEnum.haveTrouble);
+    }
     return {};
   }
 
   async verify(res: Response, token: string, hash: string) {
     const t = await this.sequlize.transaction();
     try {
-      const update = await this.userRepository.updateOneByHash(
-        hash,
-        {
-          isActivated: true,
-        },
-        { transaction: t, where: {} },
-      );
-      if (!update) throw new Error();
-      const user = this.tokenService.verifyRefreshToken(token);
-      const newToken = this.tokenService.signRefreshToken({
-        email: user.email,
-        isActivated: true,
-        roles: user.roles,
+      if (!hash) throw new ForbiddenException();
+      const user = await this.userRepository.getOneByHash(hash, {
+        include: { all: true },
       });
-      const updateToken = await this.tokenRepository.updateOneByHash(
-        token,
-        { hash: newToken },
+      if (!user) throw new ForbiddenException();
+      if (user.isActivated) throw new NotFoundException();
+      const updateUser = await this.userRepository.updateOneById(
+        user.id,
+        { isActivated: true },
         { transaction: t, where: {} },
       );
-      console.log(updateToken);
-      if (!updateToken) throw new Error();
+      if (!updateUser) throw new Error();
+      const newToken = this.tokenService.signRefreshToken(
+        this.tokenService.generatePayload(user),
+      );
+      const updateToken = await this.tokenRepository.updateOneByUserId(
+        user.id,
+        {
+          hash: newToken,
+        },
+        {
+          transaction: t,
+          where: {},
+        },
+      );
+
+      if (!updateToken) {
+        const createToken = await this.tokenRepository.create(
+          { hash: newToken, userId: user.id },
+          { transaction: t },
+        );
+        if (!createToken) throw new Error();
+      }
+
       this.tokenService.addRefreshTokenToCookie(res, newToken);
       await t.commit();
-      return {};
     } catch (e) {
+      if (e instanceof HttpException) throw e;
       await t.rollback();
-      throw new DbException(DbErrorMessage.wentWrong);
+      throw new InternalServerErrorException();
     }
-    return {};
   }
 }

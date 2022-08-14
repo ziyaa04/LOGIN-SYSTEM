@@ -26,11 +26,11 @@ import { ValidatorsModule } from './validators/validators.module';
     SequelizeModule.forRootAsync({
       useFactory: dbConfig,
     }),
-    AuthModule,
-    UserModule,
     RepositoriesModule,
     HelpersModule,
     ValidatorsModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [

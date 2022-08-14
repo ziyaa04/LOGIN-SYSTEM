@@ -4,23 +4,23 @@ import {
   Get,
   Param,
   Post,
+  Redirect,
   Req,
   Res,
-  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Roles } from '../decorators/roles.decorator';
 import RolesEnum from '../enums/roles.enum';
 import { RolesGuards } from '../guards/roles.guards';
-import { Reflector } from '@nestjs/core';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { ActivationRoles } from '../decorators/activation-roles.decorator';
 import ActivationRolesEnum from '../enums/activation-roles.enum';
+import { ActivatedGuard } from '../guards/activated.guard';
 
-@UseGuards(RolesGuards)
+@UseGuards(RolesGuards, ActivatedGuard)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -53,12 +53,16 @@ export class AuthController {
   @ActivationRoles(ActivationRolesEnum.NOTACTIVE)
   @Roles(RolesEnum.USER)
   @Post('send-verify-mail')
-  sendVerifyMail() {
-    return this.authService.sendVerifyMail();
+  sendVerifyMail(
+    @Req() req: Request & { user },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.sendVerifyMail(req, res);
   }
 
   @Roles(RolesEnum.ALL)
   @Get('verify/:hash')
+  @Redirect(process.env.CLIENT_URL)
   verify(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request,
