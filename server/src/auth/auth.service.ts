@@ -23,6 +23,8 @@ import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import ValidationErrorMessages from '../enums/error-messages/validation.error-messages.enum';
 import MailErrorMessagesEnum from '../enums/error-messages/mail.error-messages.enum';
+import { ILoginResponse, ISuccessResponse } from './types/controller.types';
+import { ISignPayload } from '../helpers/types/token.types';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +37,7 @@ export class AuthService {
     @Inject('SEQUELIZE') private readonly sequlize: Sequelize,
   ) {}
 
-  async login(res: Response, loginDto: LoginDto) {
+  async login(res: Response, loginDto: LoginDto): Promise<ILoginResponse> {
     try {
       // get user
       const user = await this.userRepository.getOneByEmail(loginDto.email, {
@@ -79,7 +81,7 @@ export class AuthService {
     }
   }
 
-  async signUp(res: Response, signUpDto: SignUpDto) {
+  async signUp(res: Response, signUpDto: SignUpDto): Promise<ILoginResponse> {
     const t = await this.sequlize.transaction();
     try {
       // write user to the db
@@ -98,7 +100,10 @@ export class AuthService {
         { transaction: t },
       );
 
-      const payload = this.tokenService.generatePayload(user, RolesEnum.USER);
+      const payload: ISignPayload = this.tokenService.generatePayload(
+        user,
+        RolesEnum.USER,
+      );
       // get tokens
       const { accessToken, refreshToken } =
         this.tokenService.signTokens(payload);
@@ -117,7 +122,7 @@ export class AuthService {
       return {
         accessToken,
         refreshToken,
-        payload,
+        user: payload,
       };
     } catch (e) {
       // catch db error and throw it
@@ -126,7 +131,7 @@ export class AuthService {
     }
   }
 
-  async logout(res: Response, hash: string) {
+  async logout(res: Response, hash: string): Promise<ISuccessResponse> {
     try {
       const deleted = await this.tokenRepository.deleteOneByHash(hash);
       if (!deleted) throw new Error();
@@ -137,7 +142,7 @@ export class AuthService {
     }
   }
 
-  async refreshToken(res: Response, token: string) {
+  async refreshToken(res: Response, token: string): Promise<ILoginResponse> {
     if (!token) throw new ForbiddenException();
     try {
       const user = this.tokenService.verifyRefreshToken(token);
@@ -158,10 +163,12 @@ export class AuthService {
       if (e instanceof ForbiddenException) throw e;
       throw new InternalServerErrorException(DbErrorMessage.wentWrong);
     }
-    return {};
   }
 
-  async sendVerifyMail(req: Request & { user }, res: Response) {
+  async sendVerifyMail(
+    req: Request & { user },
+    res: Response,
+  ): Promise<ISuccessResponse> {
     try {
       const canSend = this.mailService.checkLastMailTime(req);
       if (!canSend) throw new BadRequestException(MailErrorMessagesEnum.wait);
@@ -172,11 +179,11 @@ export class AuthService {
       );
       if (!send) throw new Error();
       res.cookie('lastMailTime', Date.now());
+      return { success: 'sent' };
     } catch (e) {
       if (e instanceof BadRequestException) throw e;
       throw new InternalServerErrorException(MailErrorMessagesEnum.haveTrouble);
     }
-    return {};
   }
 
   async verify(res: Response, token: string, hash: string) {

@@ -19,6 +19,7 @@ import { LoginDto } from './dto/login.dto';
 import { ActivationRoles } from '../decorators/activation-roles.decorator';
 import ActivationRolesEnum from '../enums/activation-roles.enum';
 import { ActivatedGuard } from '../guards/activated.guard';
+import { ILoginResponse, ISuccessResponse } from './types/controller.types';
 
 @UseGuards(RolesGuards, ActivatedGuard)
 @Controller('auth')
@@ -26,7 +27,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Res({ passthrough: true }) res: Response, @Body() loginDto: LoginDto) {
+  login(
+    @Res({ passthrough: true }) res: Response,
+    @Body() loginDto: LoginDto,
+  ): Promise<ILoginResponse> {
     return this.authService.login(res, loginDto);
   }
 
@@ -34,19 +38,25 @@ export class AuthController {
   signUp(
     @Res({ passthrough: true }) res: Response,
     @Body() signUpDto: SignUpDto,
-  ) {
+  ): Promise<ILoginResponse> {
     return this.authService.signUp(res, signUpDto);
   }
 
   @Roles(RolesEnum.USER, RolesEnum.ADMIN)
   @Post('logout')
-  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ISuccessResponse> {
     return this.authService.logout(res, req.cookies.refreshToken);
   }
 
   @Roles(RolesEnum.ALL)
   @Get('refresh-token')
-  refreshToken(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  refreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<ILoginResponse> {
     return this.authService.refreshToken(res, req?.cookies?.refreshToken);
   }
 
@@ -56,7 +66,7 @@ export class AuthController {
   sendVerifyMail(
     @Req() req: Request & { user },
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<ISuccessResponse> {
     return this.authService.sendVerifyMail(req, res);
   }
 
