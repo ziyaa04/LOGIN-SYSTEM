@@ -4,7 +4,6 @@ import { TokenService } from '../token.service';
 import { Test } from '@nestjs/testing';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { matchersWithOptions } from 'jest-json-schema';
-import { User } from '../../models/user.model';
 
 describe('Token service tests', () => {
   let tokenService: TokenService;

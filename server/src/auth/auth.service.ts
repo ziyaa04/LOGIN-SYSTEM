@@ -59,7 +59,7 @@ export class AuthService {
         throw new BadRequestException({
           password: [ValidationErrorMessages.wrongPassword],
         });
-      const remove = await this.tokenRepository.deleteOneByUserId(user.id);
+      await this.tokenRepository.deleteOneByUserId(user.id);
       const payload = this.tokenService.generatePayload(user);
       const { accessToken, refreshToken } =
         this.tokenService.signTokens(payload);
