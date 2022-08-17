@@ -75,6 +75,7 @@ describe('Token service tests', () => {
             type: 'number',
           },
         },
+        required: ['email', 'iat'],
       };
       expect(tokenService.verifyToken(token)).toMatchSchema(schema);
     });
@@ -112,6 +113,7 @@ describe('Token service tests', () => {
             type: 'array',
           },
         },
+        required: ['email', 'isActivated', 'roles'],
       };
       expect(tokenService.generatePayload(user)).toMatchSchema(scheme);
     });
