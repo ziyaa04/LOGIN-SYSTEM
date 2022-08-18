@@ -20,7 +20,7 @@ import { ActivationRoles } from '../decorators/activation-roles.decorator';
 import ActivationRolesEnum from '../enums/activation-roles.enum';
 import { ActivatedGuard } from '../guards/activated.guard';
 import { ILoginResponse, ISuccessResponse } from './types/controller.types';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(RolesGuards, ActivatedGuard)
 @ApiTags('Auth')

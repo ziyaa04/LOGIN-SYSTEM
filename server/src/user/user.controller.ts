@@ -6,8 +6,10 @@ import { Roles } from '../decorators/roles.decorator';
 import RolesEnum from '../enums/roles.enum';
 import ActivationRolesEnum from '../enums/activation-roles.enum';
 import { ActivationRoles } from '../decorators/activation-roles.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('user')
+@ApiTags('User')
 @UseGuards(RolesGuards, ActivatedGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}

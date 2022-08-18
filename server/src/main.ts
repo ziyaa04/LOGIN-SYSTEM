@@ -12,7 +12,7 @@ async function bootstrap() {
     .setTitle('Open Api')
     .setDescription('Open Api Documentation')
     .setVersion('1.0')
-    .addTag('login')
+    .addTag('LOGIN SYSTEM')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
