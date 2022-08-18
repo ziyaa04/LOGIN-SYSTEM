@@ -20,13 +20,16 @@ import { ActivationRoles } from '../decorators/activation-roles.decorator';
 import ActivationRolesEnum from '../enums/activation-roles.enum';
 import { ActivatedGuard } from '../guards/activated.guard';
 import { ILoginResponse, ISuccessResponse } from './types/controller.types';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(RolesGuards, ActivatedGuard)
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @ApiBody({ type: LoginDto })
   login(
     @Res({ passthrough: true }) res: Response,
     @Body() loginDto: LoginDto,
@@ -35,6 +38,9 @@ export class AuthController {
   }
 
   @Post('sign-up')
+  @ApiBody({
+    type: SignUpDto,
+  })
   signUp(
     @Res({ passthrough: true }) res: Response,
     @Body() signUpDto: SignUpDto,
