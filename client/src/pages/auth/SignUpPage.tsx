@@ -21,8 +21,9 @@ const SignUpPage = () => {
         if (signUpData.email && signUpData.password && signUpData.confirm_password === signUpData.password) {
             const promise = AuthService.SignUp(signUpData.email, signUpData.password, signUpData.confirm_password);
             promise.then(response => {
-                const accessToken = response.data.accessToken;
-                localStorage.setItem('accessToken', accessToken);
+                const data = response.data;
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('user', JSON.stringify(data.user));
                 setIsAuth(true);
             }).catch(err => {
                 const data = err.response.data;

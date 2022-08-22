@@ -22,13 +22,13 @@ const LoginPage = () => {
             promise.then(response => {
                 const data = response.data;
                 localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('user', JSON.stringify(data.user));
                 setIsAuth(true);
-            })
-                .catch(err => {
-                    const errorData = err.response.data;
-                    setErrors({...errorData});
-                    setLoginData({...loginData, password: ''});
-                });
+            }).catch(err => {
+                const errorData = err.response.data;
+                setErrors({...errorData});
+                setLoginData({...loginData, password: ''});
+            });
         }
     };
 

@@ -17,9 +17,11 @@ const UserRouter = () => {
     }
 
     const user: IUser = JSON.parse(localStorage.getItem('user')!);
+    console.log(user);
     if (!user.isActivated) {
         return <VerifyAccountPage/>
     }
+
     return (
         <UserContext.Provider value={{user}}>
             <Routes>
