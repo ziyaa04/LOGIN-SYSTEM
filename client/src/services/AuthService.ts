@@ -9,11 +9,15 @@ export class AuthService {
     }
 
     static async SignUp(email: string, password: string, confirmPassword: string): Promise<AxiosResponse<ILoginResponse>> {
-        return api.post<ILoginResponse>('/auth/sign-up', {email, password, confirmPassword});
+        return api.post<ILoginResponse>('/auth/sign-up', {email, password, confirm_password: confirmPassword});
     }
 
     static async Logout(): Promise<AxiosResponse<ISuccessResponse>> {
         return api.post<ISuccessResponse>('/auth/logout');
+    }
+
+    static async RefreshToken(): Promise<AxiosResponse<ILoginResponse>> {
+        return api.get<ILoginResponse>('/auth/refresh-token');
     }
 
 }
